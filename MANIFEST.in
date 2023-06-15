@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include oidc_extended *.css
+recursive-include oidc_extended *.csv
+recursive-include oidc_extended *.html
+recursive-include oidc_extended *.ico
+recursive-include oidc_extended *.js
+recursive-include oidc_extended *.json
+recursive-include oidc_extended *.md
+recursive-include oidc_extended *.png
+recursive-include oidc_extended *.py
+recursive-include oidc_extended *.svg
+recursive-include oidc_extended *.txt
+recursive-exclude oidc_extended *.pyc
