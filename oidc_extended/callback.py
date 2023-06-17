@@ -11,7 +11,7 @@ import jwt
 import frappe
 import frappe.utils
 
-frappe.utils.logger.set_log_level("DEBUG")
+#frappe.utils.logger.set_log_level("DEBUG")
 
 @frappe.whitelist(allow_guest=True)
 def custom(code: str, state: str | dict):
