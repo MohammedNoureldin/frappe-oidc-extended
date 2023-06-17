@@ -11,7 +11,7 @@ import jwt
 import frappe
 import frappe.utils
 
-frappe.utils.logger.set_log_level("DEBUG")
+#frappe.utils.logger.set_log_level("DEBUG")
 
 @frappe.whitelist(allow_guest=True)
 def custom(code: str, state: str | dict):
@@ -39,33 +39,38 @@ def custom(code: str, state: str | dict):
     # Gets the name of the OIDC custom provider.
     provider_name = request_path_components[3]
 
-    provider = frappe.get_doc("Social Login Key", frappe.get_conf().get("custom", provider_name))
+    # Gets the document of the default Social Login (OIDC) configuration.
+    social_login_provider = frappe.get_doc("Social Login Key", frappe.get_conf().get("custom", provider_name))
+    user_id_claim_name = social_login_provider.user_id_property or "sub"
 
-    user_id_property = provider.user_id_property or "sub"
+    # Gets the document of the extended OIDC configuration.
+    oidc_extended_configuration = frappe.get_cached_doc('OIDC Extended Configuration', provider_name)
+    given_name_claim_name = oidc_extended_configuration.given_name_claim_name or "given_name"
+    family_name_claim_name = oidc_extended_configuration.family_name_claim_name or "family_name"
+    email_claim_name = oidc_extended_configuration.email_claim_name or "email"
+    groups_claim_name = oidc_extended_configuration.groups_claim_name or "groups"
 
     token_request_data = {
         "grant_type": "authorization_code",
-        "client_id": provider.client_id,
-        "client_secret": provider.get_password("client_secret"),
-        "scope": json.loads(provider.auth_url_data).get("scope"),
+        "client_id": social_login_provider.client_id,
+        "client_secret": social_login_provider.get_password("client_secret"),
+        "scope": json.loads(social_login_provider.auth_url_data).get("scope"),
         "code": code,
-        "redirect_uri": frappe.utils.get_url(provider.redirect_url), # Combines ERPNext URL with redirect URL.
+        "redirect_uri": frappe.utils.get_url(social_login_provider.redirect_url), # Combines ERPNext URL with redirect URL.
     }
 
     # Requests token from token endpoint.
     token_response = requests.post(
-        url=provider.base_url + provider.access_token_url,
+        url=social_login_provider.base_url + social_login_provider.access_token_url,
         data=token_request_data,
     ).json()
 
     id_token = jwt.decode(token_response["id_token"], audience="erpnext", options={"verify_signature": False})
-    username = id_token[user_id_property]
-    email = id_token["email"]
+    username = id_token[user_id_claim_name]
+    email = id_token[email_claim_name]
     # The groups the user have as received in the token.
-    groups = id_token['groups']
+    groups = id_token[groups_claim_name]
     frappe.logger().debug(f"Groups of user {username}: {groups}")
-
-    oidc_extended_configuration = frappe.get_cached_doc('OIDC Extended Configuration', provider_name)
 
     # Creates the user if does not exsit, otherwise updates the data according to the claims of the token.
     if frappe.db.exists("User", {"username": username}):
@@ -78,8 +83,8 @@ def custom(code: str, state: str | dict):
         user = frappe.get_doc(
             {
                 "doctype": "User",
-                "first_name": id_token["given_name"],
-                "last_name": id_token["family_name"],
+                "first_name": id_token[given_name_claim_name],
+                "last_name": id_token[family_name_claim_name],
                 "username": username,
                 "email": email,
                 "send_welcome_email": 0,

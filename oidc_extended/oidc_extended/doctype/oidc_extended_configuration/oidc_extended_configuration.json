@@ -8,6 +8,12 @@
  "engine": "InnoDB",
  "field_order": [
   "provider",
+  "claims_section",
+  "given_name_claim_name",
+  "family_name_claim_name",
+  "column_break_0",
+  "email_claim_name",
+  "groups_claim_name",
   "roles_section",
   "default_role",
   "group_role_mappings"
@@ -39,10 +45,44 @@
    "fieldtype": "Table",
    "label": "Group To Role Mappings",
    "options": "OIDC Group To Role Mapping"
+  },
+  {
+   "default": "given_name",
+   "fieldname": "given_name_claim_name",
+   "fieldtype": "Data",
+   "label": "Given Name Claim"
+  },
+  {
+   "default": "family_name",
+   "fieldname": "family_name_claim_name",
+   "fieldtype": "Data",
+   "label": "Family Name Claim"
+  },
+  {
+   "default": "email",
+   "fieldname": "email_claim_name",
+   "fieldtype": "Data",
+   "label": "Email Claim"
+  },
+  {
+   "default": "groups",
+   "description": "The name of the claim that includes a list of user groups.",
+   "fieldname": "groups_claim_name",
+   "fieldtype": "Data",
+   "label": "Groups Claim"
+  },
+  {
+   "fieldname": "claims_section",
+   "fieldtype": "Section Break",
+   "label": "Token Claims"
+  },
+  {
+   "fieldname": "column_break_0",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2023-06-17 02:46:42.141483",
+ "modified": "2023-06-17 11:12:05.250379",
  "modified_by": "Administrator",
  "module": "OIDC Extended",
  "name": "OIDC Extended Configuration",
