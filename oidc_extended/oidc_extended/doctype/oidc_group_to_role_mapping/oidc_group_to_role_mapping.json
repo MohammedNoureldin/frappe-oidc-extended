@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2023-06-16 18:43:31.424947",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "group",
+  "role"
+ ],
+ "fields": [
+  {
+   "description": "A group that will be fetched from OIDC token to be mapped to a ERPNext user role.",
+   "fieldname": "group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Group",
+   "reqd": 1
+  },
+  {
+   "description": "An ERPNext user role to be assigned if the corresponding group exists in the OIDC token.",
+   "fieldname": "role",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ERPNext Role",
+   "options": "Role",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2023-06-17 02:43:21.577549",
+ "modified_by": "Administrator",
+ "module": "OIDC Extended",
+ "name": "OIDC Group To Role Mapping",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
