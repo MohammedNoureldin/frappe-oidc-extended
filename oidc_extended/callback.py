@@ -68,6 +68,8 @@ def custom(code: str, state: str | dict):
     id_token = jwt.decode(token_response["id_token"], audience="erpnext", options={"verify_signature": False})
     username = id_token[user_id_claim_name]
     email = id_token[email_claim_name]
+    first_name = id_token.get(given_name_claim_name, "No first name")
+    last_name = id_token.get(family_name_claim_name, "No last name")
     # The groups the user have as received in the token.
     groups = id_token[groups_claim_name]
     frappe.logger().debug(f"Groups of user {username}: {groups}")
@@ -83,8 +85,8 @@ def custom(code: str, state: str | dict):
         user = frappe.get_doc(
             {
                 "doctype": "User",
-                "first_name": id_token[given_name_claim_name],
-                "last_name": id_token[family_name_claim_name],
+                "first_name": first_name,
+                "last_name": last_name,
                 "username": username,
                 "email": email,
                 "send_welcome_email": 0,
@@ -146,4 +148,3 @@ def redirect_post_login(desk_user: bool, redirect_to: str):
         redirect_to = frappe.utils.get_url(desk_uri if desk_user else "/me")
 
     frappe.local.response["location"] = redirect_to
-
