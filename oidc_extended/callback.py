@@ -67,11 +67,16 @@ def custom(code: str, state: str | dict):
 
     id_token = jwt.decode(token_response["id_token"], audience="erpnext", options={"verify_signature": False})
     username = id_token[user_id_claim_name]
-    email = id_token[email_claim_name]
+
+    if email_claim_name in id_token:
+        email = id_token[email_claim_name]
+    else:
+        frappe.msgprint("The user must have an email address.", raise_exception=True)
+
     first_name = id_token.get(given_name_claim_name, "No first name")
     last_name = id_token.get(family_name_claim_name, "No last name")
     # The groups the user have as received in the token.
-    groups = id_token[groups_claim_name]
+    groups = id_token.get(groups_claim_name, "")
     frappe.logger().debug(f"Groups of user {username}: {groups}")
 
     # Creates the user if does not exsit, otherwise updates the data according to the claims of the token.
