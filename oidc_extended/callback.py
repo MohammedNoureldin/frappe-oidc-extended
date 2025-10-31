@@ -112,6 +112,9 @@ def custom(code: str, state: str | dict):
                 "user_type": "System User"
             }
         )
+
+        frappe.logger().info(f"New Frappe user {username} created successfully.")
+
         # Allows making changes on the user (like adding roles) by guest user.
         user.flags.ignore_permissions = True
 
