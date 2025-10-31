@@ -85,6 +85,24 @@ def custom(code: str, state: str | dict):
     # Creates the user if does not exsit, otherwise updates the data according to the claims of the token.
     if frappe.db.exists("User", {"username": username}):
         frappe.logger().info(f"The user {username} already exists.")
+
+        # Prevents login with the "Administrator" user via OIDC.
+        # Reason: If an OIDC provider returns groups that don't map to all
+        # necessary admin roles, or if the mapping is not configured properly,
+        # the role synchronization logic below would strip critical permissions
+        # from this account, potentially locking administrators out of the system.
+        # To prevent accidental privilege issues, the Administrator must only
+        # authenticate through the local ERPNext login mechanism where roles are
+        # managed directly.
+        if username.lower() == "administrator":
+            frappe.logger().warning(f"Attempted OIDC login with administrator account: {username}")
+            frappe.respond_as_web_page(
+                _("Not Allowed"),
+                _("Administrator account cannot login via OIDC to prevent accidental override of critical system roles and permissions. Please use the local ERPNext Administrator login instead."),
+                http_status_code=403
+            )
+            return
+
         try:
             # Fetches the existing user.
             user = frappe.get_doc("User", username)
