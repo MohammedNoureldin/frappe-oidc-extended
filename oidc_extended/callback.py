@@ -11,6 +11,7 @@ import jwt
 import frappe
 import frappe.utils
 
+frappe.utils.logger.set_log_level("INFO")
 #frappe.utils.logger.set_log_level("DEBUG")
 
 @frappe.whitelist(allow_guest=True)
@@ -79,10 +80,21 @@ def custom(code: str, state: str | dict):
     groups = id_token.get(groups_claim_name, "")
     frappe.logger().debug(f"Groups of user {username}: {groups}")
 
+    frappe.logger().debug(f"Current session user: {frappe.session.user}")
+
     # Creates the user if does not exsit, otherwise updates the data according to the claims of the token.
     if frappe.db.exists("User", {"username": username}):
-        # Fetches the existing user.
-        user = frappe.get_doc("User", email)
+        frappe.logger().info(f"The user {username} already exists.")
+        try:
+            # Fetches the existing user.
+            user = frappe.get_doc("User", username)
+        except Exception as e:
+            frappe.logger().error(f"Error fetching user: {str(e)}")
+            frappe.logger().exception(e)
+            raise
+            
+        frappe.logger().info(f"The existing user {username} fetched successfully.")
+        frappe.logger().debug(f"The existing user data: {user.as_dict()}")
     else:
         # Creates a new user.
         frappe.logger().info(f"Creating a new Frappe user: {username}")
@@ -107,16 +119,20 @@ def custom(code: str, state: str | dict):
         user.add_roles(default_role)
 
     if not user.enabled:
+        frappe.logger().info(f"The user {username} is disabled.")
         frappe.respond_as_web_page(_("Not Allowed"), _("User {0} is disabled").format(user.username))
         return False
 
     if not user.get_social_login_userid(provider_name):
+        frappe.logger().debug(f"set_social_login_userid for provider {provider_name} and user {username} called.")
         user.set_social_login_userid(provider_name, userid=username)
 
     # Allows all changes on the user in this code without checking if the operation is permitted to be done by the current user.
+    frappe.logger().info(f"Allowing all changes on the user {username} without checking permissions.")
     user.flags.ignore_permissions = True
 
     # The roles the user should have, after mapping the groups received in the token.
+    frappe.logger().debug(f"Mapping groups to roles for user {username}.")
     roles = [group_role_mapping.role for group_role_mapping in oidc_extended_configuration.group_role_mappings if group_role_mapping.group in groups]
     frappe.logger().debug(f"Frappe roles mapped from token groups of user {username}: {roles}")
 
@@ -135,7 +151,7 @@ def custom(code: str, state: str | dict):
 
     user.save()
 
-    frappe.local.login_manager.user = email # The main identity of user used by Frappe is email.
+    frappe.local.login_manager.user = user.name
     frappe.local.login_manager.post_login()
 
     frappe.db.commit()
