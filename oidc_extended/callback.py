@@ -10,6 +10,7 @@ import jwt
 
 import frappe
 import frappe.utils
+from frappe import _ # For translations
 
 frappe.utils.logger.set_log_level("INFO")
 #frappe.utils.logger.set_log_level("DEBUG")
