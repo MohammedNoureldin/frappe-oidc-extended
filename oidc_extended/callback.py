@@ -99,8 +99,12 @@ def custom(code: str, state: str | dict):
             frappe.logger().warning(f"Attempted OIDC login with administrator account: {username}")
             frappe.respond_as_web_page(
                 _("Not Allowed"),
-                _("Administrator account cannot login via OIDC to prevent accidental override of critical system roles and permissions. Please use the local ERPNext Administrator login instead."),
-                http_status_code=403
+                _("Login via OIDC is not permitted for the Administrator account. Please use the standard ERPNext login page."),
+                http_status_code=403,
+                indicator_color="orange",
+                success=False,
+                primary_action="/login",  # URL for primary action button
+                primary_label="Go to Standard Login",  # Label for primary action button
             )
             return
 
