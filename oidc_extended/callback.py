@@ -84,8 +84,9 @@ def custom(code: str, state: str | dict):
     frappe.logger().debug(f"Current session user: {frappe.session.user}")
 
     # Creates the user if does not exsit, otherwise updates the data according to the claims of the token.
-    if frappe.db.exists("User", {"username": username}):
-        frappe.logger().info(f"The user {username} already exists.")
+    existing_user_name = frappe.db.exists("User", {"username": username})
+    if existing_user_name:
+        frappe.logger().info(f"The user {username} already exists as {existing_user_name}.")
 
         # Prevents login with the "Administrator" user via OIDC.
         # Reason: If an OIDC provider returns groups that don't map to all
@@ -110,7 +111,7 @@ def custom(code: str, state: str | dict):
 
         try:
             # Fetches the existing user.
-            user = frappe.get_doc("User", username)
+            user = frappe.get_doc("User", existing_user_name)
         except Exception as e:
             frappe.logger().error(f"Error fetching user: {str(e)}")
             frappe.logger().exception(e)
