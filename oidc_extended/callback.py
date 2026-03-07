@@ -73,7 +73,13 @@ def custom(code: str, state: str | dict):
     if email_claim_name in id_token:
         email = id_token[email_claim_name]
     else:
-        frappe.msgprint("The user must have an email address.", raise_exception=True)
+        frappe.respond_as_web_page(
+            _("Missing Email"),
+            _("The identity provider did not return an email address. An email address is required to log in."),
+            http_status_code=400,
+            indicator_color="red",
+        )
+        return
 
     first_name = id_token.get(given_name_claim_name, "No first name")
     last_name = id_token.get(family_name_claim_name, "No last name")
