@@ -176,13 +176,15 @@ def custom(code: str, state: str | dict):
     current_roles = {doc.role for doc in user.get("roles")}
     frappe.logger().debug(f"Current Frappe roles of user {username}: {current_roles}")
 
-    roles_to_remove = [role for role in current_roles if role not in roles]
+    roles_to_remove = [role for role in current_roles if role not in roles and role not in ("All", "Guest")]
     frappe.logger().debug(f"Roles to remove from user {username}: {roles_to_remove}")
-    user.remove_roles(*roles_to_remove)
+    if roles_to_remove:
+        user.remove_roles(*roles_to_remove)
 
-    roles_to_add = [role for role in roles if role not in current_roles]
+    roles_to_add = [role for role in roles if role not in current_roles and role not in ("All", "Guest")]
     frappe.logger().debug(f"Roles to add to user {username}: {roles_to_add}")
-    user.add_roles(*roles_to_add)
+    if roles_to_add:
+        user.add_roles(*roles_to_add)
 
     frappe.logger().debug(f"Mapping groups to modules for user {username}.")
     visible_modules = [m.module for m in getattr(oidc_extended_configuration, "group_module_mappings", []) if m.group in groups]
