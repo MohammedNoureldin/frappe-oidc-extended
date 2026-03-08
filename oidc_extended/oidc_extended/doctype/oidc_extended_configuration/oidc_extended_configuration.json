@@ -8,15 +8,17 @@
  "engine": "InnoDB",
  "field_order": [
   "provider",
-  "claims_section",
+  "roles_section",
+  "default_roles",
+  "group_role_mappings",
   "given_name_claim_name",
   "family_name_claim_name",
-  "column_break_0",
   "email_claim_name",
   "groups_claim_name",
-  "roles_section",
-  "default_role",
-  "group_role_mappings"
+  "claims_section",
+  "column_break_0",
+  "modules_section",
+  "group_module_mappings"
  ],
  "fields": [
   {
@@ -35,16 +37,17 @@
    "label": "Roles"
   },
   {
-   "fieldname": "default_role",
-   "fieldtype": "Link",
-   "label": "Default Role",
-   "options": "Role"
+   "fieldname": "default_roles",
+   "fieldtype": "Table",
+   "label": "Default Roles",
+   "options": "OIDC Default Role"
   },
   {
    "fieldname": "group_role_mappings",
    "fieldtype": "Table",
    "label": "Group To Role Mappings",
-   "options": "OIDC Group To Role Mapping"
+   "options": "OIDC Group To Role Mapping",
+   "description": "Map OIDC groups to ERPNext roles. This assigns permissions allowing users to access data and make changes based on their role."
   },
   {
    "default": "given_name",
@@ -79,6 +82,18 @@
   {
    "fieldname": "column_break_0",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "modules_section",
+   "fieldtype": "Section Break",
+   "label": "Modules Mapping"
+  },
+  {
+   "fieldname": "group_module_mappings",
+   "fieldtype": "Table",
+   "label": "Group To Module Mappings",
+   "options": "OIDC Group To Module Mapping",
+   "description": "Map OIDC groups to ERPNext modules. This controls which modules are visible on the workspace/sidebar for the user."
   }
  ],
  "links": [],

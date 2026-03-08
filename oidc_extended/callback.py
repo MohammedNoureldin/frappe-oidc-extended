@@ -148,8 +148,10 @@ def custom(code: str, state: str | dict):
         # Allows making changes on the user (like adding roles) by guest user.
         user.flags.ignore_permissions = True
 
-        default_role = oidc_extended_configuration.default_role
-        user.add_roles(default_role)
+        if getattr(oidc_extended_configuration, "default_roles", None):
+            default_roles = [d.role for d in oidc_extended_configuration.default_roles]
+            if default_roles:
+                user.add_roles(*default_roles)
 
     if not user.enabled:
         frappe.logger().info(f"The user {username} is disabled.")
@@ -166,7 +168,7 @@ def custom(code: str, state: str | dict):
 
     # The roles the user should have, after mapping the groups received in the token.
     frappe.logger().debug(f"Mapping groups to roles for user {username}.")
-    roles = [group_role_mapping.role for group_role_mapping in oidc_extended_configuration.group_role_mappings if group_role_mapping.group in groups]
+    roles = [group_role_mapping.role for group_role_mapping in getattr(oidc_extended_configuration, "group_role_mappings", []) if group_role_mapping.group in groups]
     frappe.logger().debug(f"Frappe roles mapped from token groups of user {username}: {roles}")
 
     # The current roles of the user in Frappe.
@@ -182,6 +184,16 @@ def custom(code: str, state: str | dict):
     frappe.logger().debug(f"Roles to add to user {username}: {roles_to_add}")
     user.add_roles(*roles_to_add)
 
+    frappe.logger().debug(f"Mapping groups to modules for user {username}.")
+    visible_modules = [m.module for m in getattr(oidc_extended_configuration, "group_module_mappings", []) if m.group in groups]
+    
+    all_modules = [d.name for d in frappe.get_all("Module Def")]
+    blocked_modules = [m for m in all_modules if m not in visible_modules]
+    
+    user.set("block_modules", [])
+    for block_mod in blocked_modules:
+        user.append("block_modules", {"module": block_mod})
+        
     user.save()
 
     frappe.local.login_manager.user = user.name
