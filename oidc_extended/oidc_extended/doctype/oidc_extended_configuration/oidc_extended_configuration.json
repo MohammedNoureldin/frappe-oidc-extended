@@ -8,15 +8,15 @@
  "engine": "InnoDB",
  "field_order": [
   "provider",
-  "roles_section",
-  "default_roles",
-  "group_role_mappings",
+  "claims_section",
   "given_name_claim_name",
   "family_name_claim_name",
   "email_claim_name",
   "groups_claim_name",
-  "claims_section",
   "column_break_0",
+  "roles_section",
+  "default_roles",
+  "group_role_mappings",
   "modules_section",
   "group_module_mappings"
  ],
@@ -32,22 +32,9 @@
    "unique": 1
   },
   {
-   "fieldname": "roles_section",
+   "fieldname": "claims_section",
    "fieldtype": "Section Break",
-   "label": "Roles"
-  },
-  {
-   "fieldname": "default_roles",
-   "fieldtype": "Table",
-   "label": "Default Roles",
-   "options": "OIDC Default Role"
-  },
-  {
-   "fieldname": "group_role_mappings",
-   "fieldtype": "Table",
-   "label": "Group To Role Mappings",
-   "options": "OIDC Group To Role Mapping",
-   "description": "Map OIDC groups to ERPNext roles. This assigns permissions allowing users to access data and make changes based on their role."
+   "label": "Token Claims"
   },
   {
    "default": "given_name",
@@ -75,18 +62,31 @@
    "label": "Groups Claim"
   },
   {
-   "fieldname": "claims_section",
-   "fieldtype": "Section Break",
-   "label": "Token Claims"
-  },
-  {
    "fieldname": "column_break_0",
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "roles_section",
+   "fieldtype": "Section Break",
+   "label": "Roles"
+  },
+  {
+   "fieldname": "default_roles",
+   "fieldtype": "Table",
+   "label": "Default Roles",
+   "options": "OIDC Default Role"
+  },
+  {
+   "fieldname": "group_role_mappings",
+   "fieldtype": "Table",
+   "label": "Group To Role Mappings",
+   "options": "OIDC Group To Role Mapping",
+   "description": "Map OIDC groups to ERPNext roles. This assigns permissions allowing users to access data and make changes based on their role."
+  },
+  {
    "fieldname": "modules_section",
    "fieldtype": "Section Break",
-   "label": "Modules Mapping"
+   "label": "Modules"
   },
   {
    "fieldname": "group_module_mappings",
