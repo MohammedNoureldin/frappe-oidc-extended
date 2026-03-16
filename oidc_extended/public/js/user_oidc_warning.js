@@ -1,3 +1,5 @@
+console.log("!!! OIDC EXTENDED FLAG: SCRIPT LOADED SUCESSFULLY !!!");
+
 frappe.ui.form.on("User", {
   refresh(frm) {
     if (frm.doc.name !== "Administrator") {
