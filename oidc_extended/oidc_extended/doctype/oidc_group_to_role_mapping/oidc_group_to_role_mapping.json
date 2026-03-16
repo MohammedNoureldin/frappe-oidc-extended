@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "group",
-  "role"
+  "role_profile"
  ],
  "fields": [
   {
@@ -18,12 +18,12 @@
    "reqd": 1
   },
   {
-   "description": "An ERPNext user role to be assigned if the corresponding group exists in the OIDC token.",
-   "fieldname": "role",
+   "description": "An ERPNext Role Profile to be assigned if the corresponding group exists in the OIDC token.",
+   "fieldname": "role_profile",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "ERPNext Role",
-   "options": "Role",
+   "label": "Role Profile",
+   "options": "Role Profile",
    "reqd": 1
   }
  ],

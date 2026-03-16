@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "group",
-  "role"
+  "module_profile"
  ],
  "fields": [
   {
@@ -18,12 +18,12 @@
    "reqd": 1
   },
   {
-   "description": "An ERPNext module to be allowed if the corresponding group exists in the OIDC token.",
-   "fieldname": "module",
+   "description": "An ERPNext module profile to be applied if the corresponding group exists in the OIDC token.",
+   "fieldname": "module_profile",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Module",
-   "options": "Module Def",
+   "label": "Module Profile",
+   "options": "Module Profile",
    "reqd": 1
   }
  ],

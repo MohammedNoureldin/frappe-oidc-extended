@@ -148,10 +148,6 @@ def custom(code: str, state: str | dict):
         # Allows making changes on the user (like adding roles) by guest user.
         user.flags.ignore_permissions = True
 
-        if getattr(oidc_extended_configuration, "default_roles", None):
-            default_roles = [d.role for d in oidc_extended_configuration.default_roles]
-            if default_roles:
-                user.add_roles(*default_roles)
 
     if not user.enabled:
         frappe.logger().info(f"The user {username} is disabled.")
@@ -166,36 +162,38 @@ def custom(code: str, state: str | dict):
     frappe.logger().info(f"Allowing all changes on the user {username} without checking permissions.")
     user.flags.ignore_permissions = True
 
-    # The roles the user should have, after mapping the groups received in the token.
-    frappe.logger().debug(f"Mapping groups to roles for user {username}.")
-    roles = [group_role_mapping.role for group_role_mapping in getattr(oidc_extended_configuration, "group_role_mappings", []) if group_role_mapping.group in groups]
-    frappe.logger().debug(f"Frappe roles mapped from token groups of user {username}: {roles}")
-
-    # The current roles of the user in Frappe.
-    frappe.logger().debug(f"Current Frappe role docs of user {username}: {user.get('roles')}")
-    current_roles = {doc.role for doc in user.get("roles")}
-    frappe.logger().debug(f"Current Frappe roles of user {username}: {current_roles}")
-
-    roles_to_remove = [role for role in current_roles if role not in roles and role not in ("All", "Guest")]
-    frappe.logger().debug(f"Roles to remove from user {username}: {roles_to_remove}")
-    if roles_to_remove:
-        user.remove_roles(*roles_to_remove)
-
-    roles_to_add = [role for role in roles if role not in current_roles and role not in ("All", "Guest")]
-    frappe.logger().debug(f"Roles to add to user {username}: {roles_to_add}")
-    if roles_to_add:
-        user.add_roles(*roles_to_add)
-
-    frappe.logger().debug(f"Mapping groups to modules for user {username}.")
-    visible_modules = [m.module for m in getattr(oidc_extended_configuration, "group_module_mappings", []) if m.group in groups]
+    # -----------------------------------------------------------------------------------------
+    # Delegate role mapping to Frappe's native role_profiles table.
+    frappe.logger().debug(f"Mapping groups to role profiles for user {username}.")
+    role_profiles = [group_role_mapping.role_profile for group_role_mapping in getattr(oidc_extended_configuration, "group_role_mappings", []) if group_role_mapping.group in groups]
     
-    all_modules = [d.name for d in frappe.get_all("Module Def")]
-    blocked_modules = [m for m in all_modules if m not in visible_modules]
+    # Add any default role profiles configured for all users of this provider
+    if getattr(oidc_extended_configuration, "default_role_profiles", None):
+        default_profiles = [d.role_profile for d in oidc_extended_configuration.default_role_profiles]
+        role_profiles.extend(default_profiles)
+
+    # Frappe natively allows Multiple Role Profiles via the "role_profiles" child table.
+    user.set("role_profiles", [])
+    for rp in list(set(role_profiles)):
+        user.append("role_profiles", {"role_profile": rp})
+
+    # Delegate module blocking to Frappe's native module profile field.
+    frappe.logger().debug(f"Mapping groups to module profiles for user {username}.")
+    module_profiles = [m.module_profile for m in getattr(oidc_extended_configuration, "group_module_mappings", []) if m.group in groups]
     
-    user.set("block_modules", [])
-    for block_mod in blocked_modules:
-        user.append("block_modules", {"module": block_mod})
-        
+    if getattr(oidc_extended_configuration, "group_module_mappings", []):
+        if module_profiles:
+            # Currently, Frappe User doctype supports a single Module Profile natively.
+            # We assign the first matched profile.
+            user.module_profile = module_profiles[0]
+        else:
+            # If no groups match, assign the default module profile if configured.
+            default_module_profile = getattr(oidc_extended_configuration, "default_module_profile", None)
+            if default_module_profile:
+                user.module_profile = default_module_profile
+            else:
+                user.module_profile = None
+                
     user.save()
 
     frappe.local.login_manager.user = user.name

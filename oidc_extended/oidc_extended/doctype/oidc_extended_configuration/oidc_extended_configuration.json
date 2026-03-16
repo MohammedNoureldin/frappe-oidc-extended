@@ -15,9 +15,10 @@
   "groups_claim_name",
   "column_break_0",
   "roles_section",
-  "default_roles",
+  "default_role_profiles",
   "group_role_mappings",
   "modules_section",
+  "default_module_profile",
   "group_module_mappings"
  ],
  "fields": [
@@ -71,10 +72,11 @@
    "label": "Roles"
   },
   {
-   "fieldname": "default_roles",
+   "fieldname": "default_role_profiles",
    "fieldtype": "Table",
-   "label": "Default Roles",
-   "options": "OIDC Default Role"
+   "label": "Default Role Profiles",
+   "options": "OIDC Default Role Profile",
+   "description": "Any user logging in via this provider will automatically receive these Role Profiles."
   },
   {
    "fieldname": "group_role_mappings",
@@ -88,8 +90,13 @@
    "fieldtype": "Section Break",
    "label": "Modules"
   },
-  {
-   "fieldname": "group_module_mappings",
+  {   "description": "If a user has no matching group mappings, they will be assigned this default module profile.",
+   "fieldname": "default_module_profile",
+   "fieldtype": "Link",
+   "label": "Default Module Profile",
+   "options": "Module Profile"
+  },
+  {   "fieldname": "group_module_mappings",
    "fieldtype": "Table",
    "label": "Group To Module Mappings",
    "options": "OIDC Group To Module Mapping",
