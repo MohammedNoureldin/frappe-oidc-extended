@@ -9,36 +9,41 @@ frappe.ui.form.on("User", {
 
       // Wait a moment for standard user.js to finish painting all of its custom grids
       setTimeout(() => {
+        let $roles_wrapper = frm.fields_dict.roles ? $(frm.fields_dict.roles.wrapper) : null;
         
-        // 1. Inject a SINGLE, full-width warning at the absolute top of the Roles section
-        if (frm.fields_dict.roles && frm.fields_dict.roles.wrapper) {
-          // Find the parent section-body to ensure it gets full 100% uncompressed width
-          let $sectionBody = $(frm.fields_dict.roles.wrapper).closest('.section-body');
-          if ($sectionBody.length === 0) {
-            $sectionBody = $(frm.fields_dict.roles.wrapper).closest('.form-section');
-          }
-          
-          if ($sectionBody.length && $sectionBody.find('.oidc-section-warning').length === 0) {
-            $(`<div class="alert alert-warning oidc-section-warning" style="margin: 0 15px 15px 15px; grid-column: 1 / -1; width: calc(100% - 30px);">
-                <strong><i class="fa fa-exclamation-triangle"></i> ${warning_msg}</strong>
-               </div>`).prependTo($sectionBody);
-          }
+        // 1. Inject warning at the VERY TOP of the Roles Section
+        if ($roles_wrapper) {
+            let $section = $roles_wrapper.closest('.form-section');
+            if ($section.length && $section.find('.oidc-section-warning').length === 0) {
+                // Prepend completely to the section form-body so it spans full width
+                $(`<div class="alert alert-warning oidc-section-warning" style="margin: 15px;">
+                    <strong><i class="fa fa-exclamation-triangle"></i> ${warning_msg}</strong>
+                   </div>`).prependTo($section);
+            }
         }
         
-        // 2. Lock the fields at the ROOT control level (.frappe-control)
+        // 2. Lock the fields using a 100% reliable physical UI overlay
+        // This avoids messing with Frappe's DOM, keeping values visible but strictly unclickable
         const lock_field = (fieldname) => {
-            // Using .$wrapper (JQuery object of the whole control) instead of .wrapper (just the input area)
-            // This guarantees we capture the Label header, the "Select All" buttons, and the Inputs.
-            if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].$wrapper) {
-                let $control = frm.fields_dict[fieldname].$wrapper;
+            if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].wrapper) {
+                let $wrapper = $(frm.fields_dict[fieldname].wrapper);
                 
-                // pointer-events: none physically prevents ALL mouse interaction.
-                // Links, buttons, checkboxes, and input fields inside will ignore clicks entirely.
-                // We don't modify the inner DOM layer, avoiding broken Frappe UI logic!
-                $control.css({
-                    "pointer-events": "none",
-                    "opacity": "0.6"
-                });
+                // Ensure wrapper can hold an absolute positioned child
+                if ($wrapper.css('position') === 'static' || $wrapper.css('position') === '') {
+                    $wrapper.css('position', 'relative');
+                }
+
+                // Remove existing to avoid duplicates on refresh
+                $wrapper.find('.oidc-lock-overlay').remove();
+
+                // Append an invisible shield that blocks all clicks and grays out the area
+                $('<div class="oidc-lock-overlay"></div>').css({
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                    cursor: 'not-allowed'
+                }).appendTo($wrapper);
             }
         };
 
