@@ -173,8 +173,14 @@ def custom(code: str, state: str | dict):
             role_profiles.extend(fallback_profiles)
 
     # Frappe natively allows Multiple Role Profiles via the "role_profiles" child table.
+    current_role_profiles = {rp.role_profile for rp in user.get("role_profiles", [])}
+    new_role_profiles = set(role_profiles)
+    
+    # Check if role profiles changed to clear sessions if they were downgraded or changed
+    role_profiles_changed = current_role_profiles != new_role_profiles
+
     user.set("role_profiles", [])
-    for rp in list(set(role_profiles)):
+    for rp in list(new_role_profiles):
         user.append("role_profiles", {"role_profile": rp})
 
     # Delegate module blocking to Frappe's native module profile field.
@@ -191,6 +197,11 @@ def custom(code: str, state: str | dict):
         user.module_profile = fallback_module_profile or None
                 
     user.save()
+
+    if role_profiles_changed:
+        frappe.logger().info(f"Role profiles changed for {username}. Clearing active sessions to enforce new permissions instantly.")
+        frappe.cache().hdel("sessions", user.name)
+        frappe.cache().hdel("bhas_role", user.name)
 
     frappe.local.login_manager.user = user.name
     frappe.local.login_manager.post_login()
