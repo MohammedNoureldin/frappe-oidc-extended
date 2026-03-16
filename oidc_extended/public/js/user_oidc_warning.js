@@ -7,33 +7,35 @@ frappe.ui.form.on("User", {
         "Roles and module profiles of this user are managed by OIDC. Any manual changes made here will be overwritten upon the user's next login."
       );
 
-      // Use setTimeout to ensure our changes run AFTER Frappe's standard user.js finishes rendering its custom HTML
+      // Wait slightly for Frappe's standard user.js to finish painting custom HTML
       setTimeout(() => {
-        // Ensure the banner stays visible
-        frm.set_intro(warning_msg, "orange");
-        frm.dashboard.set_headline_alert(
-          `<div class="text-orange"><b>Warning:</b> ${warning_msg}</div>`
-        );
-
-        // Frappe 16 uses custom HTML wrappers for the Roles checklist. 
-        // Standard "read_only" df property is often ignored by these custom UI elements.
-        // We force them to be visually locked and non-interactive using CSS and DOM manipulation.
-        const managed_fields = ["roles", "role_profiles", "module_profile", "block_modules"];
-
-        managed_fields.forEach((fieldname) => {
-          // 1. Try standard Frappe read_only
-          frm.set_df_property(fieldname, "read_only", 1);
-
-          // 2. Force DOM-level disabled state (bulletproof for completely custom Frappe 16 UI)
+        const add_warning_to_field = (fieldname) => {
           if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].wrapper) {
             let $wrapper = $(frm.fields_dict[fieldname].wrapper);
-            $wrapper.find("input, select, button, textarea").prop("disabled", true);
-            $wrapper.css({
-              "pointer-events": "none",
-              "opacity": "0.7"
-            });
+            // Prevent duplicate warnings if refreshed
+            if ($wrapper.find('.oidc-warning').length === 0) {
+              $(`<div class="alert alert-warning oidc-warning" style="margin-bottom: 10px;">
+                  <strong><i class="fa fa-exclamation-triangle"></i> ${warning_msg}</strong>
+                 </div>`).prependTo($wrapper);
+            }
+          }
+        };
+
+        // 1. Inject the yellow warning directly inside the sections
+        add_warning_to_field("role_profiles");  // Top of Roles Section
+        add_warning_to_field("module_profile"); // Top of Modules Section
+
+        // 2. Lock the fields
+        const managed_fields = ["roles", "role_profiles", "module_profile", "block_modules"];
+        managed_fields.forEach((fieldname) => {
+          frm.set_df_property(fieldname, "read_only", 1);
+          
+          // Force disable the checkboxes (Catch Frappe 16's custom HTML)
+          if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].wrapper) {
+            $(frm.fields_dict[fieldname].wrapper).find("input").prop("disabled", true);
           }
         });
+
       }, 500);
     }
   },
