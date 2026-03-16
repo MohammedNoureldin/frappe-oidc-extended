@@ -22,7 +22,7 @@
  "modified": "2023-06-16 19:12:47.886470",
  "modified_by": "Administrator",
  "module": "OIDC Extended",
- "name": "OIDC Default Role Profile",
+ "name": "OIDC Fallback Role Profile",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

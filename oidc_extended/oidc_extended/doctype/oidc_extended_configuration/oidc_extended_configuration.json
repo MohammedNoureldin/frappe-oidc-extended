@@ -15,7 +15,7 @@
   "groups_claim_name",
   "column_break_0",
   "roles_section",
-  "default_role_profiles",
+  "fallback_role_profiles",
   "group_role_mappings",
   "modules_section",
   "fallback_module_profile",
@@ -72,11 +72,11 @@
    "label": "Roles"
   },
   {
-   "fieldname": "default_role_profiles",
+   "fieldname": "fallback_role_profiles",
    "fieldtype": "Table",
-   "label": "Default Role Profiles",
-   "options": "OIDC Default Role Profile",
-   "description": "Any user logging in via this provider will automatically receive these Role Profiles."
+   "label": "Fallback Role Profiles",
+   "options": "OIDC Fallback Role Profile",
+   "description": "If a user has no matching group mappings, they will be assigned these fallback role profiles."
   },
   {
    "fieldname": "group_role_mappings",

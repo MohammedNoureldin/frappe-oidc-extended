@@ -162,15 +162,15 @@ def custom(code: str, state: str | dict):
     frappe.logger().info(f"Allowing all changes on the user {username} without checking permissions.")
     user.flags.ignore_permissions = True
 
-    # -----------------------------------------------------------------------------------------
     # Delegate role mapping to Frappe's native role_profiles table.
     frappe.logger().debug(f"Mapping groups to role profiles for user {username}.")
     role_profiles = [group_role_mapping.role_profile for group_role_mapping in getattr(oidc_extended_configuration, "group_role_mappings", []) if group_role_mapping.group in groups]
     
-    # Add any default role profiles configured for all users of this provider
-    if getattr(oidc_extended_configuration, "default_role_profiles", None):
-        default_profiles = [d.role_profile for d in oidc_extended_configuration.default_role_profiles]
-        role_profiles.extend(default_profiles)
+    # If no groups match, assign the fallback role profiles if configured
+    if not role_profiles:
+        if getattr(oidc_extended_configuration, "fallback_role_profiles", None):
+            fallback_profiles = [d.role_profile for d in oidc_extended_configuration.fallback_role_profiles]
+            role_profiles.extend(fallback_profiles)
 
     # Frappe natively allows Multiple Role Profiles via the "role_profiles" child table.
     user.set("role_profiles", [])
