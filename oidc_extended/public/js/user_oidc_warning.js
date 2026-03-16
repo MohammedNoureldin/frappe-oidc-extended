@@ -7,57 +7,52 @@ frappe.ui.form.on("User", {
         "Roles and module profiles of this user are managed by OIDC. Any manual changes made here will be overwritten upon the user's next login."
       );
 
-      // Wait slightly for Frappe's standard user.js to finish painting custom HTML
+      // Wait a moment for standard user.js to finish painting all of its custom grids
       setTimeout(() => {
+        let $roles_wrapper = frm.fields_dict.roles ? $(frm.fields_dict.roles.wrapper) : null;
         
-        // 1. Inject a SINGLE, full-width warning at the absolute top of the Roles section
-        if (frm.fields_dict.roles && frm.fields_dict.roles.wrapper) {
-          // Find the parent section-body to ensure it gets full 100% uncompressed width
-          let $sectionBody = $(frm.fields_dict.roles.wrapper).closest('.section-body');
-          if ($sectionBody.length === 0) {
-            $sectionBody = $(frm.fields_dict.roles.wrapper).closest('.form-section');
-          }
-          
-          if ($sectionBody.length && $sectionBody.find('.oidc-section-warning').length === 0) {
-            $(`<div class="alert alert-warning oidc-section-warning" style="margin: 0 15px 15px 15px; grid-column: 1 / -1; width: calc(100% - 30px);">
-                <strong><i class="fa fa-exclamation-triangle"></i> ${warning_msg}</strong>
-               </div>`).prependTo($sectionBody);
-          }
+        // 1. Inject warning at the VERY TOP of the Roles Section
+        if ($roles_wrapper) {
+            let $section = $roles_wrapper.closest('.form-section');
+            if ($section.length && $section.find('.oidc-section-warning').length === 0) {
+                // Prepend completely to the section form-body so it spans full width
+                $(`<div class="alert alert-warning oidc-section-warning" style="margin: 15px;">
+                    <strong><i class="fa fa-exclamation-triangle"></i> ${warning_msg}</strong>
+                   </div>`).prependTo($section);
+            }
         }
+        
+        // 2. Lock the fields using a 100% reliable physical UI overlay
+        // This avoids messing with Frappe's DOM, keeping values visible but strictly unclickable
+        const lock_field = (fieldname) => {
+            if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].wrapper) {
+                let $wrapper = $(frm.fields_dict[fieldname].wrapper);
+                
+                // Ensure wrapper can hold an absolute positioned child
+                if ($wrapper.css('position') === 'static' || $wrapper.css('position') === '') {
+                    $wrapper.css('position', 'relative');
+                }
 
-        // 2. Safely disable fields purely via DOM so they don't get hidden or squished
-        // Notice we REMOVED set_df_property() because Frappe tends to completely hide MultiSelect and Tables when read_only=1
-        const lock_wrapper = (fieldname) => {
-          if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].wrapper) {
-            let $wrapper = $(frm.fields_dict[fieldname].wrapper);
-            
-            // Disable native inputs and buttons
-            $wrapper.find("input, select, button").prop("disabled", true);
-            
-            // Explicitly kill the "Select All" / "Deselect All" anchor tags
-            $wrapper.find("a").addClass("disabled text-muted").css({
-              "pointer-events": "none",
-              "text-decoration": "none"
-            });
+                // Remove existing to avoid duplicates on refresh
+                $wrapper.find('.oidc-lock-overlay').remove();
 
-            // Hide the little 'x' removal buttons on the role_profiles tags
-            $wrapper.find(".btn-remove").hide();
-            
-            // Apply a brutal lock to everything inside the wrapper to guarantee 100% disabled state
-            $wrapper.css({
-              "pointer-events": "none",
-              "opacity": "0.65",
-              "user-select": "none"
-            });
-          }
+                // Append an invisible shield that blocks all clicks and grays out the area
+                $('<div class="oidc-lock-overlay"></div>').css({
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 9999,
+                    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                    cursor: 'not-allowed'
+                }).appendTo($wrapper);
+            }
         };
 
-        lock_wrapper("roles");
-        lock_wrapper("role_profiles");
-        lock_wrapper("module_profile");
-        lock_wrapper("block_modules");
+        lock_field("role_profiles");
+        lock_field("roles");
+        lock_field("module_profile");
+        lock_field("block_modules");
 
-      }, 500);
+      }, 800); // 800ms delay guarantees Frappe is completely finished initializing
     }
   },
 });
