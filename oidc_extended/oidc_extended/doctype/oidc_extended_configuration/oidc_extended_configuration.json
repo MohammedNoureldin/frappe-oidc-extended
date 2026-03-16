@@ -18,7 +18,7 @@
   "default_role_profiles",
   "group_role_mappings",
   "modules_section",
-  "default_module_profile",
+  "fallback_module_profile",
   "group_module_mappings"
  ],
  "fields": [
@@ -88,15 +88,17 @@
   {
    "fieldname": "modules_section",
    "fieldtype": "Section Break",
-   "label": "Modules"
+   "label": "Modules Mapping"
   },
-  {   "description": "If a user has no matching group mappings, they will be assigned this default module profile.",
-   "fieldname": "default_module_profile",
+  {
+   "description": "If a user has no matching group mappings, they will be assigned this fallback module profile.",
+   "fieldname": "fallback_module_profile",
    "fieldtype": "Link",
-   "label": "Default Module Profile",
+   "label": "Fallback Module Profile",
    "options": "Module Profile"
   },
-  {   "fieldname": "group_module_mappings",
+  {
+   "fieldname": "group_module_mappings",
    "fieldtype": "Table",
    "label": "Group To Module Mappings",
    "options": "OIDC Group To Module Mapping",

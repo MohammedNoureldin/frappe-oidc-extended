@@ -181,18 +181,14 @@ def custom(code: str, state: str | dict):
     frappe.logger().debug(f"Mapping groups to module profiles for user {username}.")
     module_profiles = [m.module_profile for m in getattr(oidc_extended_configuration, "group_module_mappings", []) if m.group in groups]
     
-    if getattr(oidc_extended_configuration, "group_module_mappings", []):
-        if module_profiles:
-            # Currently, Frappe User doctype supports a single Module Profile natively.
-            # We assign the first matched profile.
-            user.module_profile = module_profiles[0]
-        else:
-            # If no groups match, assign the default module profile if configured.
-            default_module_profile = getattr(oidc_extended_configuration, "default_module_profile", None)
-            if default_module_profile:
-                user.module_profile = default_module_profile
-            else:
-                user.module_profile = None
+    if module_profiles:
+        # Currently, Frappe User doctype supports a single Module Profile natively.
+        # We assign the first matched profile.
+        user.module_profile = module_profiles[0]
+    else:
+        # If no groups match, assign the fallback module profile if configured.
+        fallback_module_profile = getattr(oidc_extended_configuration, "fallback_module_profile", None)
+        user.module_profile = fallback_module_profile or None
                 
     user.save()
 
