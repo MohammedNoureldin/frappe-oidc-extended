@@ -22,15 +22,29 @@ frappe.ui.form.on("User", {
             }
         }
 
-        // 2. Simple locking mechanism ONLY for module_profile and role_profiles
+        // 2. Simple locking mechanism for all 4 OIDC-controlled fields
         // We use pure CSS to block clicks and slightly dim them. 
-        // This guarantees Frappe's inner HTML/data representation is completely untouched.
-        ["module_profile", "role_profiles"].forEach(fieldname => {
+        // We also explicitly hide the custom "Select All / Unselect All" links Frappe generates.
+        ["module_profile", "role_profiles", "roles", "block_modules"].forEach(fieldname => {
             if (frm.fields_dict[fieldname] && frm.fields_dict[fieldname].$wrapper) {
-                frm.fields_dict[fieldname].$wrapper.css({
+                let $control = frm.fields_dict[fieldname].$wrapper;
+                
+                // CSS lock the whole block
+                $control.css({
                     "pointer-events": "none",
                     "opacity": "0.6"
                 });
+
+                // Target the specific Select All / Unselect All links inside the custom grids and hide them
+                // so they can't be tabbed to or clicked by accident
+                $control.find('a').each(function() {
+                    if ($(this).text().toLowerCase().includes('select')) {
+                        $(this).hide();
+                    }
+                });
+                
+                // Also explicitly hide any standard buttons in those controls just in case
+                $control.find('button').hide();
             }
         });
 
