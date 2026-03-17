@@ -20,7 +20,7 @@ frappe.ui.form.on("User", {
 				}
 			}
 
-			// 2. Visually disable Profile Fields (CSS lock avoids breaking Frappe HTML)
+			// 2. Visually disable Profile Fields
 			["role_profiles", "module_profile"].forEach(field => {
 				let ctrl = frm.fields_dict[field];
 				if (ctrl && ctrl.$wrapper) {
@@ -28,11 +28,11 @@ frappe.ui.form.on("User", {
 				}
 			});
 
-			// 3. Hide "Select All" / "Clear" links on the Roles and Modules trees
+			// 3. Hide the Frappe 16 bulk-select option buttons (Select All / Unselect All)
 			["roles", "block_modules"].forEach(field => {
 				let ctrl = frm.fields_dict[field];
 				if (ctrl && ctrl.$wrapper) {
-					ctrl.$wrapper.find("a").filter((i, el) => $(el).text().match(/select|clear/i)).hide();
+					ctrl.$wrapper.find('.bulk-select-options').hide();
 				}
 			});
 
