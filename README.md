@@ -11,7 +11,7 @@ Features:
 - Specify the default Fallback Profiles (Role and Module) for users matching no specific groups.
 - Automatically creates users from trusted identity providers even if signup is disabled in the site.
 
-![image](https://github.com/MohammedNoureldin/frappe-oidc-extended/assets/14913147/e72cd642-efb5-4aab-a954-77c3744adab4)
+<img width="1001" height="1258" alt="image" src="https://github.com/user-attachments/assets/ffd51abb-82e1-4b99-940c-d24cfe88b548" />
 
 #### *Social Login Key* Configuration
 
