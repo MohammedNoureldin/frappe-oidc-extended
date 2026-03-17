@@ -31,8 +31,13 @@ frappe.ui.form.on("User", {
 			// 3. Hide the Frappe 16 bulk-select option buttons (Select All / Unselect All)
 			["roles", "block_modules"].forEach(field => {
 				let ctrl = frm.fields_dict[field];
-				if (ctrl && ctrl.$wrapper) {
-					ctrl.$wrapper.find('.bulk-select-options').hide();
+				if (ctrl && ctrl.wrapper) {
+					// We search the entire DOM form for any buttons with these specific classes
+					// because Frappe might put them outside the logical $wrapper
+					$(ctrl.wrapper)
+						.closest('.form-section, .frappe-control')  // Step up to guarantee we encapsulate headers
+						.find('.bulk-select-options, .select-all, .deselect-all')
+						.hide();
 				}
 			});
 
