@@ -2,10 +2,32 @@ frappe.ui.form.on("User", {
 	refresh(frm) {
 		if (frm.doc.name === "Administrator") return;
 
-		// Delay ensures Frappe's custom user.js has finished rendering grids
+		// Inject pure CSS to force elements to be locked or hidden.
+		// Since Frappe redraws the DOM and checkboxes asynchronously, standard JS UI operations fail.
+		if (!document.getElementById("oidc-user-lock-css")) {
+			$(`<style id="oidc-user-lock-css">
+				/* Lock the profile fields */
+				div[data-fieldname="role_profiles"],
+				div[data-fieldname="module_profile"] {
+					pointer-events: none !important;
+					opacity: 0.6 !important;
+					user-select: none !important;
+				}
+				
+				/* Permanently hide the Select All / Unselect All buttons */
+				.bulk-select-options,
+				button.select-all,
+				button.deselect-all {
+					display: none !important;
+					visibility: hidden !important;
+					pointer-events: none !important;
+				}
+			</style>`).appendTo("head");
+		}
+
+		// Delay ensures the DOM wrapper is ready before we inject the banner div
 		setTimeout(() => {
-			
-			// 1. Show Warning Banner at the top of the Roles Section
+			// Show Warning Banner at the top of the Roles Section
 			let roles_ctrl = frm.fields_dict.roles;
 			if (roles_ctrl && roles_ctrl.wrapper) {
 				let $section = $(roles_ctrl.wrapper).closest('.form-section');
@@ -19,28 +41,6 @@ frappe.ui.form.on("User", {
 					`);
 				}
 			}
-
-			// 2. Visually disable Profile Fields
-			["role_profiles", "module_profile"].forEach(field => {
-				let ctrl = frm.fields_dict[field];
-				if (ctrl && ctrl.$wrapper) {
-					ctrl.$wrapper.css({ "pointer-events": "none", "opacity": "0.6" });
-				}
-			});
-
-			// 3. Hide the Frappe 16 bulk-select option buttons (Select All / Unselect All)
-			["roles", "block_modules"].forEach(field => {
-				let ctrl = frm.fields_dict[field];
-				if (ctrl && ctrl.wrapper) {
-					// We search the entire DOM form for any buttons with these specific classes
-					// because Frappe might put them outside the logical $wrapper
-					$(ctrl.wrapper)
-						.closest('.form-section, .frappe-control')  // Step up to guarantee we encapsulate headers
-						.find('.bulk-select-options, .select-all, .deselect-all')
-						.hide();
-				}
-			});
-
 		}, 500);
 	}
 });
