@@ -1,0 +1,100 @@
+{
+ "app": "oidc_extended",
+ "charts": [],
+ "content": "[{\"id\": \"oidc_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>OIDC Extended</b></span>\", \"col\": 12}}, {\"id\": \"oidc_card_cfg\", \"type\": \"card\", \"data\": {\"card_name\": \"Configuration\", \"col\": 4}}, {\"id\": \"oidc_card_map\", \"type\": \"card\", \"data\": {\"card_name\": \"Group Mappings\", \"col\": 4}}]",
+ "creation": "2026-08-19 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "shield",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "OIDC Extended",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Configuration",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OIDC Extended Configuration",
+   "link_count": 0,
+   "link_to": "OIDC Extended Configuration",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OIDC Fallback Role Profile",
+   "link_count": 0,
+   "link_to": "OIDC Fallback Role Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Group Mappings",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OIDC Group to Role Mapping",
+   "link_count": 0,
+   "link_to": "OIDC Group to Role Mapping",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "OIDC Group to Module Mapping",
+   "link_count": 0,
+   "link_to": "OIDC Group to Module Mapping",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-27 12:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "OIDC Extended",
+ "name": "OIDC Extended",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 99.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "",
+   "label": "OIDC Extended Configuration",
+   "link_to": "OIDC Extended Configuration",
+   "type": "DocType"
+  }
+ ],
+ "title": "OIDC Extended",
+ "type": "Workspace"
+}
