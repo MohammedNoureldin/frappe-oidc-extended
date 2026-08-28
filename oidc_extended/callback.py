@@ -4,19 +4,19 @@
 # - https://github.com/castlecraft/microsoft_integration/blob/main/microsoft_integration/callback.py
 
 import json
-import base64
 import requests
 import jwt
 
 import frappe
 import frappe.utils
 from frappe import _ # For translations
+from frappe.utils.oauth import consume_oauth_state
 
 frappe.utils.logger.set_log_level("INFO")
 #frappe.utils.logger.set_log_level("DEBUG")
 
 @frappe.whitelist(allow_guest=True)
-def custom(code: str, state: str | dict):
+def custom(code: str, state: str):
     """Callback for processing the request received after a successful authentication in an identity provider (OIDC provider).
 
     OIDC redirect URL: /api/method/oidc_extended.callback.custom/<provider name>
@@ -26,10 +26,13 @@ def custom(code: str, state: str | dict):
     - Maps groups from the claim of id token to ERPNext roles.
     """
 
-    state = json.loads(base64.b64decode(state).decode("utf-8"))
-
-    if not state or not state["token"]:
-        frappe.respond_as_web_page(_("Invalid request"), _("Token is missing."), http_status_code=417)
+    redirect_to = consume_oauth_state(state)
+    if redirect_to is None:
+        frappe.respond_as_web_page(
+            _("Invalid Request"),
+            _("Your login attempt is invalid or has expired. Please try again."),
+            http_status_code=417,
+        )
         return
 
     request_path_components = frappe.request.path[1:].split("/")
@@ -210,7 +213,7 @@ def custom(code: str, state: str | dict):
 
     redirect_post_login(
         desk_user=frappe.local.response.get("message") == "Logged In",
-        redirect_to=state.get("redirect_to")
+        redirect_to=redirect_to,
     )
 
 def redirect_post_login(desk_user: bool, redirect_to: str):
